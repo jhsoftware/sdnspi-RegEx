@@ -18,7 +18,7 @@
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
     <OptionInfer>On</OptionInfer>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -34,6 +34,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +45,7 @@
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -54,10 +56,11 @@
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="sdnsplugin">
-      <HintPath>.\sdnsplugin.dll</HintPath>
+    <Reference Include="sdnscommon">
+      <HintPath>..\..\private\sdns\sdnscommon\bin\Release\sdnscommon.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -65,6 +68,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Import Include="JHSoftware.SimpleDNS" />
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
     <Import Include="System.Collections" />
@@ -76,12 +80,6 @@
       <DependentUpon>ctlAddEditRemove.vb</DependentUpon>
     </Compile>
     <Compile Include="ctlAddEditRemove.vb">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ctlTTL.Designer.vb">
-      <DependentUpon>ctlTTL.vb</DependentUpon>
-    </Compile>
-    <Compile Include="ctlTTL.vb">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="frmRegExIP.Designer.vb">
@@ -101,6 +99,7 @@
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -116,9 +115,6 @@
   <ItemGroup>
     <EmbeddedResource Include="ctlAddEditRemove.resx">
       <DependentUpon>ctlAddEditRemove.vb</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ctlTTL.resx">
-      <DependentUpon>ctlTTL.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmRegExIP.resx">
       <SubType>Designer</SubType>

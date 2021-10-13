@@ -46,7 +46,6 @@
   Private Sub btns_ClickedAdd() Handles btns.ClickedAdd
     NewItemFlag = True
     Dim frm = New frmRegExIP
-    frm.IPCtrl = GetIPCtrl.Invoke(True, True)
     AddHandler frm.FormClosing, AddressOf SubFrmClosing
     frm.ShowDialog()
   End Sub
@@ -55,11 +54,10 @@
     If lstMatch.SelectedIndices.Count < 1 Then Exit Sub
     NewItemFlag = False
     Dim frm = New frmRegExIP
-    frm.IPCtrl = GetIPCtrl.Invoke(True, True)
     AddHandler frm.FormClosing, AddressOf SubFrmClosing
     With lstMatch.SelectedItems(0)
       frm.txtRegEx.Text = .Text
-      frm.IPCtrl.Text = .SubItems(1).Text
+      frm.CtlIP1.Text = .SubItems(1).Text
       frm.CtlTTL1.Value = DirectCast(.Tag, Integer)
     End With
     frm.ShowDialog()
@@ -69,7 +67,7 @@
     Dim frm = DirectCast(sender, frmRegExIP)
     If frm.DialogResult <> Windows.Forms.DialogResult.OK Then Exit Sub
     Dim regex As String = frm.txtRegEx.Text.Trim
-    Dim ip As String = System.Net.IPAddress.Parse(frm.IPCtrl.Text).ToString
+    Dim ip As String = System.Net.IPAddress.Parse(frm.CtlIP1.Text).ToString
     For i = 0 To lstMatch.Items.Count - 1
       If Not NewItemFlag AndAlso i = lstMatch.SelectedIndices(0) Then Continue For
       If lstMatch.Items(i).Text = regex Then

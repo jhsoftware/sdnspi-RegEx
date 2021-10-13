@@ -1,22 +1,20 @@
 Imports JHSoftware.SimpleDNS.Plugin
 
 Public Class RegExPlugIn
-  Implements IGetHostPlugIn
+  Implements ILookupHost
+  Implements IOptionsUI
 
   Private MatchListIPv4 As List(Of MatchItem)
   Private MatchListIPv6 As List(Of MatchItem)
 
+  Public Property Host As IHost Implements IPlugInBase.Host
+
   Private Class MatchItem
     Friend RegEx As System.Text.RegularExpressions.Regex
-    Friend IP As IPAddress
+    Friend IP As SdnsIP
     Friend TTL As Integer
   End Class
 
-#Region "events"
-  Public Event LogLine(ByVal text As String) Implements IGetHostPlugIn.LogLine
-  Public Event AsyncError(ByVal ex As System.Exception) Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.AsyncError
-  Public Event SaveConfig(ByVal config As String) Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.SaveConfig
-#End Region
 
 #Region "readonly properties"
 
@@ -24,51 +22,34 @@ Public Class RegExPlugIn
     With GetPlugInTypeInfo
       .Name = "Regular Expressions"
       .Description = "Respond with same IP address to all requests for host names matching a regular expression"
-      .InfoURL = "http://www.simpledns.com/plugin-regex"
-      .ConfigFile = False
-      .MultiThreaded = False
+      .InfoURL = "https://simpledns.plus/kb/185/regular-expressions-plug-in"
     End With
   End Function
 
 #End Region
 
 #Region "not implemented"
-  Public Function InstanceConflict(ByVal configXML1 As String, ByVal configXML2 As String, ByRef errorMsg As String) As Boolean Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.InstanceConflict
+  Public Function InstanceConflict(ByVal configXML1 As String, ByVal configXML2 As String, ByRef errorMsg As String) As Boolean Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.InstanceConflict
     Return False
   End Function
 
-  Public Function GetDNSAskAbout() As DNSAskAboutGH Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.GetDNSAskAbout
-    With GetDNSAskAbout
-      .ForwardIPv4 = True
-      .ForwardIPv6 = True
-    End With
-  End Function
-
-  Public Sub LoadState(ByVal stateXML As String) Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.LoadState
+  Public Sub LoadState(ByVal stateXML As String) Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.LoadState
   End Sub
 
-  Public Function SaveState() As String Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.SaveState
+  Public Function SaveState() As String Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.SaveState
     Return ""
   End Function
 
-  Public Sub StartService() Implements IGetHostPlugIn.StartService
-  End Sub
+  Public Function StartService() As Threading.Tasks.Task Implements IPlugInBase.StartService
+    Return Threading.Tasks.Task.CompletedTask
+  End Function
 
-  Public Sub StopService() Implements IGetHostPlugIn.StopService
-  End Sub
-
-  Public Sub LookupReverse(ByVal req As IDNSRequest, ByRef resultName As DomainName, ByRef resultTTL As Integer) Implements IGetHostPlugIn.LookupReverse
-    Throw New NotSupportedException
-  End Sub
-
-  Public Sub LookupTXT(ByVal req As IDNSRequest, ByRef resultText As String, ByRef resultTTL As Integer) Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.LookupTXT
-    Throw New NotSupportedException
+  Public Sub StopService() Implements IPlugInBase.StopService
   End Sub
 
 #End Region
 
-#Region "other methods"
-  Public Sub LoadConfig(ByVal config As String, ByVal instanceID As Guid, ByVal dataPath As String, ByRef maxThreads As Integer) Implements JHSoftware.SimpleDNS.Plugin.IGetHostPlugIn.LoadConfig
+  Public Sub LoadConfig(ByVal config As String, ByVal instanceID As Guid, ByVal dataPath As String) Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.LoadConfig
     MatchListIPv4 = New List(Of MatchItem)
     MatchListIPv6 = New List(Of MatchItem)
     If config.Length = 0 Then Exit Sub
@@ -84,7 +65,7 @@ Public Class RegExPlugIn
       If Not elem.HasAttribute("ttl") Then Continue For
       mi = New MatchItem
       mi.RegEx = New System.Text.RegularExpressions.Regex(elem.GetAttribute("regex"), Text.RegularExpressions.RegexOptions.Compiled)
-      mi.IP = IPAddress.Parse(elem.GetAttribute("ip"))
+      mi.IP = SdnsIP.Parse(elem.GetAttribute("ip"))
       mi.TTL = Integer.Parse(elem.GetAttribute("ttl"))
       If mi.IP.IPVersion = 4 Then
         MatchListIPv4.Add(mi)
@@ -94,23 +75,16 @@ Public Class RegExPlugIn
     Next
   End Sub
 
-  Public Sub Lookup(ByVal req As IDNSRequest, ByRef resultIP As IPAddress, ByRef resultTTL As Integer) Implements IGetHostPlugIn.Lookup
-    Dim hn As String = req.QName.ToStringNative
-    For Each mi In If(req.QType = 1US, MatchListIPv4, MatchListIPv6)
-      If mi.RegEx.IsMatch(hn) Then
-        resultIP = mi.IP
-        resultTTL = mi.TTL
-        Exit Sub
-      End If
+  Public Function LookupHost(name As DomName, ipv6 As Boolean, req As IDNSRequest) As Threading.Tasks.Task(Of LookupResult(Of SdnsIP)) Implements ILookupHost.LookupHost
+    Dim hn As String = name.ToString(True)
+    For Each mi In If(ipv6, MatchListIPv6, MatchListIPv4)
+      If mi.RegEx.IsMatch(hn) Then Return Threading.Tasks.Task.FromResult(New LookupResult(Of SdnsIP) With {.Value = mi.IP, .TTL = mi.TTL})
     Next
-    resultIP = Nothing
-  End Sub
-
-  Public Function GetOptionsUI(ByVal instanceID As Guid, ByVal dataPath As String) As OptionsUI Implements IGetHostPlugIn.GetOptionsUI
-    Return New OptionsCtrl
+    Return Threading.Tasks.Task.FromResult(Of LookupResult(Of SdnsIP))(Nothing)
   End Function
 
-#End Region
-
+  Public Function GetOptionsUI(ByVal instanceID As Guid, ByVal dataPath As String) As OptionsUI Implements IOptionsUI.GetOptionsUI
+    Return New OptionsCtrl
+  End Function
 
 End Class
