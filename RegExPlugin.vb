@@ -18,11 +18,11 @@ Public Class RegExPlugIn
 
 #Region "readonly properties"
 
-  Public Function GetPlugInTypeInfo() As JHSoftware.SimpleDNS.Plugin.IPlugInBase.PlugInTypeInfo Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.GetPlugInTypeInfo
+  Public Function GetPlugInTypeInfo() As JHSoftware.SimpleDNS.Plugin.IPlugInBase.PlugInTypeInfo Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.GetTypeInfo
     With GetPlugInTypeInfo
       .Name = "Regular Expressions"
       .Description = "Respond with same IP address to all requests for host names matching a regular expression"
-      .InfoURL = "https://simpledns.plus/kb/185/regular-expressions-plug-in"
+      .InfoURL = "https://simpledns.plus/plugin-regex"
     End With
   End Function
 
@@ -75,7 +75,7 @@ Public Class RegExPlugIn
     Next
   End Sub
 
-  Public Function LookupHost(name As DomName, ipv6 As Boolean, req As IDNSRequest) As Threading.Tasks.Task(Of LookupResult(Of SdnsIP)) Implements ILookupHost.LookupHost
+  Public Function LookupHost(name As DomName, ipv6 As Boolean, req As IRequestContext) As Threading.Tasks.Task(Of LookupResult(Of SdnsIP)) Implements ILookupHost.LookupHost
     Dim hn As String = name.ToString(True)
     For Each mi In If(ipv6, MatchListIPv6, MatchListIPv4)
       If mi.RegEx.IsMatch(hn) Then Return Threading.Tasks.Task.FromResult(New LookupResult(Of SdnsIP) With {.Value = mi.IP, .TTL = mi.TTL})
