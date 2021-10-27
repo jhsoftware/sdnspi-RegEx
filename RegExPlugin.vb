@@ -18,7 +18,7 @@ Public Class RegExPlugIn
 
 #Region "readonly properties"
 
-  Public Function GetPlugInTypeInfo() As JHSoftware.SimpleDNS.Plugin.IPlugInBase.PlugInTypeInfo Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.GetTypeInfo
+  Public Function GetPlugInTypeInfo() As TypeInfo Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.GetTypeInfo
     With GetPlugInTypeInfo
       .Name = "Regular Expressions"
       .Description = "Respond with same IP address to all requests for host names matching a regular expression"
@@ -31,13 +31,6 @@ Public Class RegExPlugIn
 #Region "not implemented"
   Public Function InstanceConflict(ByVal configXML1 As String, ByVal configXML2 As String, ByRef errorMsg As String) As Boolean Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.InstanceConflict
     Return False
-  End Function
-
-  Public Sub LoadState(ByVal stateXML As String) Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.LoadState
-  End Sub
-
-  Public Function SaveState() As String Implements JHSoftware.SimpleDNS.Plugin.IPlugInBase.SaveState
-    Return ""
   End Function
 
   Public Function StartService() As Threading.Tasks.Task Implements IPlugInBase.StartService
